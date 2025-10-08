@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSMS - Access Logs</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <aside class="sidebar">
+    <ul class="nav-list">
+      <li><a href="dashboard.html" class="nav-link"><span class="nav-icon">🏠</span>Dashboard</a></li>
+      <li><a href="documents.html" class="nav-link"><span class="nav-icon">📄</span>My Documents</a></li>
+      <li><a href="share.html" class="nav-link"><span class="nav-icon">🔗</span>Share</a></li>
+      <li><a href="logs.html" class="nav-link active"><span class="nav-icon">📊</span>Logs</a></li>
+      <li><a href="notifications.html" class="nav-link"><span class="nav-icon">🔔</span>Notifications <span class="nav-badge" id="sidebarNotifBadge">2</span></a></li>
+    </ul>
+    <button id="logoutBtn" class="btn btn-metamask">Logout</button>
+  </aside>
+  <div class="main-content">
+    <header class="main-header">
+      <span class="main-title">Access Logs</span>
+      <a href="#" class="main-link" style="float:right;color:#8b5cf6;font-size:0.97em;">6 Log Entries</a>
+    </header>
+    <section class="documents-section">
+      <h3>Recent Notifications</h3>
+      <div id="recentNotifications">
+        <!-- Dynamically loaded -->
+      </div>
+    </section>
+    <section class="documents-section">
+      <h3>Access Timeline</h3>
+      <div id="accessTimeline">
+        <!-- Dynamically loaded -->
+      </div>
+    </section>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

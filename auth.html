@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSMS - Authentication</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" type="button">Login</button>
+        <button class="auth-tab" id="registerTab" type="button">Register</button>
+      </div>
+      <form id="loginForm" autocomplete="off">
+        <h2 class="auth-title">Sign In</h2>
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" name="loginEmail" required maxlength="64" autocomplete="email" placeholder="you@email.com"/>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="loginPassword" required minlength="8" maxlength="64" autocomplete="current-password" placeholder="••••••••"/>
+        </div>
+        <button type="submit" id="loginBtn" class="btn btn-primary">Sign In</button>
+        <button type="button" id="loginMetaMaskBtn" class="btn btn-metamask">Login with MetaMask (Web3)</button>
+        <div id="loginMessage" class="auth-message"></div>
+      </form>
+      <form id="registerForm" autocomplete="off" style="display:none;">
+        <h2 class="auth-title">Create Account</h2>
+        <div class="form-group">
+          <label for="registerFullName">Full Name</label>
+          <input type="text" id="registerFullName" name="registerFullName" required maxlength="64" autocomplete="name" placeholder="John Doe"/>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" name="registerEmail" required maxlength="64" autocomplete="email" placeholder="you@email.com"/>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" name="registerPassword" required minlength="8" maxlength="64" autocomplete="new-password" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required minlength="8" maxlength="64" autocomplete="new-password" placeholder="••••••••"/>
+        </div>
+        <button type="submit" id="registerBtn" class="btn btn-primary">Create Account</button>
+        <button type="button" id="registerMetaMaskBtn" class="btn btn-metamask">Login with MetaMask (Web3)</button>
+        <div id="registerMessage" class="auth-message"></div>
+      </form>
+    </div>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSMS - Manage Documents</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <aside class="sidebar">
+    <ul class="nav-list">
+      <li><a href="dashboard.html" class="nav-link"><span class="nav-icon">🏠</span>Dashboard</a></li>
+      <li><a href="documents.html" class="nav-link active"><span class="nav-icon">📄</span>Manage Documents</a></li>
+    </ul>
+    <button id="logoutBtn" class="btn btn-metamask">Logout</button>
+  </aside>
+  <div class="main-content">
+    <header class="main-header">
+      <span class="main-title">Manage My Documents</span>
+    </header>
+    <section class="quick-actions">
+      <button class="btn btn-primary" id="uploadModalBtn">Upload New Document</button>
+    </section>
+    <section class="documents-section">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Date</th>
+            <th>IPFS Hash</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="documentsTable"></tbody>
+      </table>
+      <div id="documentsMessage" class="auth-message" style="display:none;"></div>
+    </section>
+  </div>
+  <div class="modal" id="uploadModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeUploadModal">&times;</button>
+      <h3 style="margin-bottom:12px;">Upload Document</h3>
+      <div id="uploadStatus" class="upload-status"></div>
+      <form id="uploadForm">
+        <div id="dropZone" class="drop-zone">
+          <svg height="36" viewBox="0 0 24 24" width="36">
+            <path fill="#1a4be7" d="M12 16v-8m0 0l-4 4m4-4l4 4"/>
+          </svg>
+          <div class="drop-zone-label" id="dropZoneLabel">Drop your file here</div>
+          <div class="drop-zone-desc" id="dropZoneDesc">or click to browse</div>
+          <input type="file" id="uploadFile" name="file" accept=".pdf,.doc,.docx,.jpg,.png" style="display:none;"/>
+          <button type="button" onclick="document.getElementById('uploadFile').click();" class="btn btn-metamask" style="margin-top:14px;">Choose File</button>
+        </div>
+        <div style="font-size:0.88em;color:#a2a8bc;margin-bottom:11px;">Supports: PDF, DOC, DOCX, JPG, PNG (Max 10MB)</div>
+        <button type="submit" id="uploadBtn" class="btn btn-primary">Upload</button>
+        <div id="uploadMessage" class="auth-message"></div>
+      </form>
+    </div>
+  </div>
+  <div class="modal" id="shareModal" style="display:none;">
+    <div class="modal-content">
+      <button class="close-modal" id="closeShareModal">&times;</button>
+      <h3>Share Document</h3>
+      <div id="shareModalContent"></div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
