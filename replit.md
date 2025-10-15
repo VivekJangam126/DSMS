@@ -94,10 +94,30 @@ Access the application at the Replit preview URL (port 5000).
 ### Production Deployment
 The application is configured for autoscale deployment using the same http-server setup with cache disabled.
 
-## Security Notes
-- Firebase configuration and Pinata JWT are currently hardcoded in `script.js`
-- For production use, these should be moved to environment variables
-- The Pinata JWT token has an expiration date (configured in the token)
+## ⚠️ CRITICAL SECURITY WARNINGS
+
+### Exposed Credentials (HIGH PRIORITY)
+**The following credentials are currently hardcoded in `script.js` and publicly visible:**
+
+1. **Firebase API Key**: AIzaSyC4QwcMK93Hp1blRZRH9o9P2n1nLh8nOyg
+2. **Pinata JWT Token**: Exposed bearer token for IPFS uploads
+
+**IMMEDIATE ACTIONS REQUIRED:**
+- These credentials should be **rotated immediately** if this code has been pushed to a public repository
+- Move all credentials to environment variables or a secure backend
+- Never commit API keys or secrets to version control
+- For production deployment, implement a backend API that handles Pinata uploads server-side
+
+### Recommended Security Improvements
+1. **Backend API**: Create a server-side endpoint to handle IPFS uploads
+2. **Environment Variables**: Store Firebase config and API keys in Replit Secrets
+3. **Firebase Security Rules**: Configure proper database security rules to restrict access
+4. **Key Rotation**: Rotate both Firebase and Pinata credentials after moving them to secure storage
+
+## Additional Security Notes
+- The Pinata JWT token has an expiration date (expires: 2026-06-04)
+- Firebase security rules should be configured to prevent unauthorized access
+- Client-side storage of credentials is inherently insecure for production applications
 
 ## User Preferences
 None configured yet. The project follows standard web development practices.
