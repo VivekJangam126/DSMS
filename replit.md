@@ -31,27 +31,47 @@ DSMS is a decentralized document management system that allows users to securely
 
 ## Recent Changes (October 15, 2025)
 
-### GitHub Import Setup
-1. Added missing authentication handlers to `script.js`:
-   - Login form submission with Firebase authentication
-   - Registration form with email/password validation
-   - Tab switching between login and register forms
-   - Logout functionality
-   - MetaMask placeholder handlers
+### GitHub Import & Security Setup
+1. **Security Improvements**:
+   - Moved all Firebase and Pinata credentials to Replit Secrets
+   - Created backend server (server.js) to serve config securely via /api/config endpoint
+   - Updated frontend to fetch credentials from backend instead of hardcoding
+   - Added .gitignore to prevent committing sensitive files
 
-2. Fixed Firebase initialization:
-   - Added proper type checking for Firebase before initialization
-   - Added Firebase scripts to `index.html` to prevent loading errors
-   - All HTML pages now properly load Firebase SDK
+2. **Authentication & Firebase**:
+   - Login/registration with Firebase authentication working
+   - Proper config loading with async initialization
+   - All HTML pages load Firebase SDK correctly
 
-3. Configured development workflow:
-   - Installed `http-server` package via npm
-   - Set up workflow to serve static files on port 5000
-   - Enabled CORS for proper API access
+3. **Development Workflow**:
+   - Node.js server on port 5000 serving static files
+   - CORS enabled for API access
+   - Cache-control headers for proper development
 
-4. Configured deployment:
-   - Set up autoscale deployment for the static website
-   - Configured http-server with cache disabled for production
+### Feature Enhancements
+4. **Share Page Improvements**:
+   - Replaced manual email input with searchable user dropdown
+   - Users can search by name or email to select recipients
+   - Pre-selects document when redirected from documents page
+   - Proper validation prevents empty recipient submissions
+
+5. **Documents Page Update**:
+   - Removed inline share modal
+   - Share button now redirects to share.html with pre-selected document via URL parameters
+   - Cleaner UI with better user flow
+
+6. **Comprehensive Activity Logging**:
+   - All user actions logged to Firebase (upload, delete, share, revoke)
+   - logs.html displays activity timeline with timestamps
+   - Color-coded log types (upload, share, delete, revoke, access)
+   - Detailed logging includes file names, sizes, recipients, and IPFS CIDs
+
+7. **Landing Page Redesign**:
+   - Modern gradient hero section with call-to-action buttons
+   - Feature cards showcasing DSMS capabilities (6 features)
+   - "How It Works" section with 3-step guide
+   - Professional navigation and footer
+   - Responsive design for mobile devices
 
 ## Features
 

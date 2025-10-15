@@ -789,8 +789,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const documentId = selectDocument.value;
       const documentName = selectDocument.options[selectDocument.selectedIndex]?.dataset?.fileName || "Unknown";
       
-      if (!documentId || !receiverEmailValue || !permission || expiryDays === undefined) {
-        showMsg("shareMessage", "Please fill in all fields.", "error");
+      if (!documentId) {
+        showMsg("shareMessage", "Please select a document.", "error");
+        return;
+      }
+      
+      if (!receiverEmailValue || receiverEmailValue.trim() === "") {
+        showMsg("shareMessage", "Please select a recipient from the dropdown.", "error");
+        return;
+      }
+      
+      if (!permission) {
+        showMsg("shareMessage", "Please select a permission level.", "error");
+        return;
+      }
+      
+      if (expiryDays === undefined) {
+        showMsg("shareMessage", "Please select an expiry time.", "error");
         return;
       }
       
@@ -847,6 +862,7 @@ const waitForAuthInit = setInterval(() => {
         renderDocuments(user);
       }
       if (user && currentPage === "share.html") {
+        loadAllUsers();
         populateDocumentDropdown(user);
         renderActiveShares(user);
       }
