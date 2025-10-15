@@ -11,12 +11,15 @@ const firebaseConfig = {
 };
 const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MWQwOGY2My05MmU2LTRlNjMtOWVmYy0wNjQyNjhiN2UzM2EiLCJlbWFpbCI6InZpdmVramFuZ2FtMTI2QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI1YmI5ODU3MjQ5Njk2ZTEwNTc5OCIsInNjb3BlZEtleVNlY3JldCI6Ijk0NjhjYzNjN2JjMjljNjY0Mzc1NTkwYWQ1M2FmMDMzNTE3NTYzM2RiOGQyNzBmMmFhOTYxYTExYjkxZTEwZjciLCJleHAiOjE3OTE0NzA3NDR9.G-AmgSYnT2VZTCn-n-j2eXvo9GVj54fcSCJs0JZRRIM";
 
+let db, auth;
 
-if (!window.firebase?.apps?.length) {
-  firebase.initializeApp(firebaseConfig);
+if (typeof firebase !== 'undefined') {
+  if (!firebase.apps?.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  db = firebase.database();
+  auth = firebase.auth();
 }
-const db = firebase.database();
-const auth = firebase.auth();
 
 const protectedPages = [
   "dashboard.html",
