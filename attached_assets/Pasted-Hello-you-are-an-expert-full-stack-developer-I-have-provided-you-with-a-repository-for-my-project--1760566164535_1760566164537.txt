@@ -1,0 +1,72 @@
+Hello, you are an expert full-stack developer. I have provided you with a repository for my project, the Decentralized Secure Management System (DSMS). It's a partially completed application, and I need you to debug it, implement the remaining features, and bring it to a fully functional state.
+
+1. Project Overview
+The DSMS is a web application where users can securely upload, manage, and share their important documents.
+
+Frontend: The application is built with HTML, CSS, and vanilla JavaScript.
+
+Backend: It uses Firebase for authentication and as a Realtime Database for storing metadata.
+
+Storage: Actual document storage is handled by IPFS through the Pinata pinning service.
+
+Design: The UI/UX design is based on a Figma prototype (screenshots have been provided in our previous conversations).
+
+2. Current Status of the Repository
+The current code is a basic version with the foundational structure in place.
+
+What's Done:
+
+Basic HTML files for the landing, auth, dashboard, and other pages have been created.
+
+A CSS file with initial styling exists.
+
+An initial script.js file with some logic for Firebase setup, uploads, and authentication has been written.
+
+What's Broken (Known Issues):
+
+The core functionality is buggy and incomplete.
+
+The UI has some layout and styling issues.
+
+3. Your Task: Bugs to Fix and Features to Implement
+Your main goal is to fix all existing issues and complete the application's core features.
+
+A. Immediate Bugs to Fix:
+Broken Register Tab: On the auth.html page, the "Register" tab is not working. The user can't switch from the login form to the registration form. This must be fixed.
+
+Improper Sharing Feature: The share.html page is not working correctly. The UI is not properly implemented, and the logic to create or view shares is broken.
+
+B. Core Features to Implement and Complete:
+Full Authentication System:
+
+Perfect the login and registration flow with robust error handling (e.g., show clear messages for wrong passwords, existing emails, etc.).
+
+Implement session management to protect all internal pages, redirecting unauthenticated users to the login page.
+
+Ensure the logout functionality works correctly.
+
+Document Upload and Management:
+
+Solidify the IPFS upload process. It must be responsive, providing clear feedback to the user during the upload (e.g., "Uploading...", "Success!").
+
+Ensure the document's metadata (including the userId of the owner) is correctly saved to the Firebase Realtime Database after a successful upload.
+
+Ensure documents are correctly fetched and displayed on the dashboard and "My Documents" pages without disappearing on reload.
+
+Advanced Sharing System (share.html):
+
+The "Select Document" dropdown must be populated with the user's files from Firebase.
+
+Recipient Validation: Before creating a share, the script must check the /users collection in Firebase to verify the recipient's email exists.
+
+Expiry Time: The expiry field should be a dropdown with options ("1 Day," "1 Week," "1 Month," "Never Expire").
+
+Permissions: The permission field must be a dropdown ("View-only," "Download").
+
+Revoke Access: The "Revoke" button in the "Active Shares" table must be functional, changing the status of the share in Firebase.
+
+Dynamic UI and Data:
+
+All data displayed on the dashboard (summary cards), "My Documents" page, and "Share" page must be loaded dynamically from Firebase. Remove all hardcoded or placeholder content.
+
+Please review all the provided files, fix the bugs, and implement the features as described to deliver a complete and functional application.

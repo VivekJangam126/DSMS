@@ -23,7 +23,11 @@ if (typeof firebase !== 'undefined') {
 
 const protectedPages = [
   "dashboard.html",
-  "documents.html"
+  "documents.html",
+  "share.html",
+  "settings.html",
+  "logs.html",
+  "notifications.html"
 ];
 const currentPage = window.location.pathname.split("/").pop();
 
@@ -406,11 +410,30 @@ document.addEventListener("DOMContentLoaded", () => {
       showMsg("loginMessage", "");
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value;
+      
+      if (!email || !password) {
+        showMsg("loginMessage", "Please enter both email and password.", "error");
+        setBtnLoading("loginBtn", false);
+        return;
+      }
+      
       try {
         await auth.signInWithEmailAndPassword(email, password);
         showMsg("loginMessage", "Login successful! Redirecting...", "success");
       } catch (err) {
-        showMsg("loginMessage", err.message || "Login failed. Please try again.", "error");
+        let errorMsg = "Login failed. Please try again.";
+        if (err.code === "auth/user-not-found") {
+          errorMsg = "No account found with this email. Please register first.";
+        } else if (err.code === "auth/wrong-password") {
+          errorMsg = "Incorrect password. Please try again.";
+        } else if (err.code === "auth/invalid-email") {
+          errorMsg = "Invalid email address format.";
+        } else if (err.code === "auth/user-disabled") {
+          errorMsg = "This account has been disabled.";
+        } else if (err.code === "auth/too-many-requests") {
+          errorMsg = "Too many failed attempts. Please try again later.";
+        }
+        showMsg("loginMessage", errorMsg, "error");
         setBtnLoading("loginBtn", false);
       }
     });
@@ -427,6 +450,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("registerPassword").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
 
+      if (!fullName) {
+        showMsg("registerMessage", "Please enter your full name.", "error");
+        setBtnLoading("registerBtn", false);
+        return;
+      }
+
+      if (!email || !password || !confirmPassword) {
+        showMsg("registerMessage", "Please fill in all fields.", "error");
+        setBtnLoading("registerBtn", false);
+        return;
+      }
+
+      if (password.length < 8) {
+        showMsg("registerMessage", "Password must be at least 8 characters long.", "error");
+        setBtnLoading("registerBtn", false);
+        return;
+      }
+
       if (password !== confirmPassword) {
         showMsg("registerMessage", "Passwords do not match.", "error");
         setBtnLoading("registerBtn", false);
@@ -441,9 +482,19 @@ document.addEventListener("DOMContentLoaded", () => {
           email,
           createdAt: Date.now()
         });
-        showMsg("registerMessage", "Account created! Redirecting...", "success");
+        showMsg("registerMessage", "Account created successfully! Redirecting...", "success");
       } catch (err) {
-        showMsg("registerMessage", err.message || "Registration failed. Please try again.", "error");
+        let errorMsg = "Registration failed. Please try again.";
+        if (err.code === "auth/email-already-in-use") {
+          errorMsg = "This email is already registered. Please login instead.";
+        } else if (err.code === "auth/invalid-email") {
+          errorMsg = "Invalid email address format.";
+        } else if (err.code === "auth/weak-password") {
+          errorMsg = "Password is too weak. Please use a stronger password.";
+        } else if (err.code === "auth/operation-not-allowed") {
+          errorMsg = "Email/password authentication is not enabled.";
+        }
+        showMsg("registerMessage", errorMsg, "error");
         setBtnLoading("registerBtn", false);
       }
     });
@@ -486,6 +537,164 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// --- Share Page Functions ---
+async function populateDocumentDropdown(user) {
+  if (!user) return;
+  const selectDocument = document.getElementById("selectDocument");
+  if (!selectDocument) return;
+  
+  const docs = await fetchDocuments(user.uid);
+  selectDocument.innerHTML = '<option value="" disabled selected>Choose a document</option>';
+  
+  if (docs.length === 0) {
+    selectDocument.innerHTML += '<option disabled>No documents available</option>';
+    return;
+  }
+  
+  docs.forEach(doc => {
+    const option = document.createElement("option");
+    option.value = doc.id;
+    option.textContent = doc.fileName;
+    option.dataset.fileName = doc.fileName;
+    selectDocument.appendChild(option);
+  });
+}
+
+async function validateRecipientEmail(email) {
+  try {
+    const usersSnap = await db.ref("users").orderByChild("email").equalTo(email).once("value");
+    return usersSnap.exists();
+  } catch (err) {
+    console.error("Error validating recipient:", err);
+    return false;
+  }
+}
+
+async function renderActiveShares(user) {
+  if (!user) return;
+  const sharesTable = document.getElementById("sharesTable");
+  if (!sharesTable) return;
+  
+  try {
+    const allDocs = await fetchDocuments(user.uid);
+    const docsMap = {};
+    allDocs.forEach(doc => { docsMap[doc.id] = doc.fileName; });
+    
+    const sharesSnap = await db.ref("shares").orderByChild("userId").equalTo(user.uid).once("value");
+    const shares = sharesSnap.val() || {};
+    const activeShares = Object.entries(shares)
+      .map(([id, share]) => ({ id, ...share }))
+      .filter(s => s.status === "Active");
+    
+    if (activeShares.length === 0) {
+      sharesTable.innerHTML = '<tr><td colspan="6">No active shares</td></tr>';
+      return;
+    }
+    
+    sharesTable.innerHTML = activeShares.map(share => {
+      const docName = docsMap[share.documentId] || "Unknown Document";
+      const expiryText = share.expiryDays === 0 ? "Never" : 
+                        share.expiryDate ? new Date(share.expiryDate).toLocaleDateString() : "N/A";
+      return `
+        <tr>
+          <td>${docName}</td>
+          <td>${share.receiverEmail || "N/A"}</td>
+          <td>${share.permission || "View-only"}</td>
+          <td>${expiryText}</td>
+          <td><span class="status-tag">${share.status}</span></td>
+          <td>
+            <button class="doc-action" title="Revoke" onclick="revokeShare('${share.id}')">🚫</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error("Error rendering shares:", err);
+    sharesTable.innerHTML = '<tr><td colspan="6">Error loading shares</td></tr>';
+  }
+}
+
+window.revokeShare = async function(shareId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  if (!confirm("Are you sure you want to revoke this share?")) return;
+  
+  try {
+    await db.ref(`shares/${shareId}/status`).set("Revoked");
+    showMsg("shareMessage", "Share revoked successfully!", "success");
+    await renderActiveShares(user);
+  } catch (err) {
+    showMsg("shareMessage", "Failed to revoke share. Please try again.", "error");
+    console.error("Revoke error:", err);
+  }
+};
+
+// Share form submission handler
+document.addEventListener("DOMContentLoaded", () => {
+  const shareForm = document.getElementById("shareForm");
+  if (shareForm) {
+    shareForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) {
+        showMsg("shareMessage", "You must be logged in to share documents.", "error");
+        return;
+      }
+      
+      const selectDocument = document.getElementById("selectDocument");
+      const receiverEmail = document.getElementById("receiverEmail").value.trim();
+      const expiryDays = parseInt(document.getElementById("expiryTime").value);
+      const permission = document.getElementById("permissionSelect").value;
+      const documentId = selectDocument.value;
+      const documentName = selectDocument.options[selectDocument.selectedIndex]?.dataset?.fileName || "Unknown";
+      
+      if (!documentId || !receiverEmail || !permission || expiryDays === undefined) {
+        showMsg("shareMessage", "Please fill in all fields.", "error");
+        return;
+      }
+      
+      if (receiverEmail === user.email) {
+        showMsg("shareMessage", "You cannot share a document with yourself.", "error");
+        return;
+      }
+      
+      showMsg("shareMessage", "Validating recipient...", "info");
+      
+      const recipientExists = await validateRecipientEmail(receiverEmail);
+      if (!recipientExists) {
+        showMsg("shareMessage", "Recipient email not found in the system. They must have an account.", "error");
+        return;
+      }
+      
+      try {
+        const shareId = "share_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+        const shareData = {
+          documentId,
+          documentName,
+          userId: user.uid,
+          receiverEmail,
+          permission,
+          expiryDays,
+          expiryDate: expiryDays > 0 ? Date.now() + (expiryDays * 24 * 60 * 60 * 1000) : null,
+          status: "Active",
+          link: `${window.location.origin}/view.html?share=${shareId}`,
+          createdAt: Date.now()
+        };
+        
+        await db.ref(`shares/${shareId}`).set(shareData);
+        showMsg("shareMessage", "Document shared successfully!", "success");
+        
+        shareForm.reset();
+        await renderActiveShares(user);
+      } catch (err) {
+        showMsg("shareMessage", "Failed to share document. Please try again.", "error");
+        console.error("Share error:", err);
+      }
+    });
+  }
+});
+
 // Only render after login
 auth.onAuthStateChanged(user => {
   if (!user && protectedPages.includes(currentPage)) {
@@ -499,5 +708,9 @@ auth.onAuthStateChanged(user => {
   if (user && (currentPage === "dashboard.html" || currentPage === "documents.html")) {
     renderDashboardSummary(user);
     renderDocuments(user);
+  }
+  if (user && currentPage === "share.html") {
+    populateDocumentDropdown(user);
+    renderActiveShares(user);
   }
 });
