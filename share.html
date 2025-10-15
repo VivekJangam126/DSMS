@@ -24,25 +24,43 @@
     <section class="documents-section">
       <form id="shareForm">
         <h3>Share Document</h3>
-        <div class="quick-actions" style="margin-bottom:0;">
-          <select id="selectDocument" name="selectDocument" required style="flex:2; margin-right:8px;">
+        <div class="form-group">
+          <label for="selectDocument">Select Document</label>
+          <select id="selectDocument" name="selectDocument" required>
             <option value="" disabled selected>Choose a document</option>
           </select>
-          <input type="email" id="receiverEmail" name="receiverEmail" placeholder="Receiver Email" required style="flex:2; margin-right:8px;"/>
-          <select id="expiryTime" name="expiryTime" required style="flex:1; margin-right:8px;">
-            <option value="" disabled selected>Expiry</option>
+        </div>
+        <div class="form-group">
+          <label for="receiverSearch">Select Recipient</label>
+          <div style="position: relative;">
+            <input type="text" id="receiverSearch" placeholder="Search users by name or email..." autocomplete="off" style="width: 100%; padding-right: 30px;"/>
+            <div id="userDropdown" class="user-dropdown" style="display: none;"></div>
+          </div>
+          <input type="hidden" id="receiverEmail" name="receiverEmail" required/>
+          <div id="selectedUser" style="margin-top: 8px; padding: 8px; background: #f0f2f5; border-radius: 6px; display: none;">
+            <strong>Selected:</strong> <span id="selectedUserText"></span>
+            <button type="button" onclick="clearUserSelection()" style="float: right; background: none; border: none; cursor: pointer; color: #d23333;">✕</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="expiryTime">Expiry Time</label>
+          <select id="expiryTime" name="expiryTime" required>
+            <option value="" disabled selected>Choose expiry time</option>
             <option value="1">1 Day</option>
             <option value="7">1 Week</option>
             <option value="30">1 Month</option>
             <option value="0">Never Expire</option>
           </select>
-          <select id="permissionSelect" name="permissionSelect" required style="flex:1;">
-            <option value="" disabled selected>Permission</option>
+        </div>
+        <div class="form-group">
+          <label for="permissionSelect">Permission</label>
+          <select id="permissionSelect" name="permissionSelect" required>
+            <option value="" disabled selected>Choose permission level</option>
             <option value="View-only">View-only</option>
             <option value="Download">Download</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="margin-top:18px;">Generate Secure Link</button>
+        <button type="submit" class="btn btn-primary">Generate Secure Link</button>
         <div id="shareMessage" class="auth-message"></div>
       </form>
     </section>

@@ -184,53 +184,8 @@ async function renderDocuments(user) {
 
 // --- Actions ---
 window.openShareModal = async function(docId, fileName) {
-  const shareModal = document.getElementById("shareModal");
-  const shareModalContent = document.getElementById("shareModalContent");
-  if (!shareModal || !shareModalContent) return;
-  shareModal.style.display = "flex";
-  shareModalContent.innerHTML = `
-    <div>
-      <strong>Sharing "${fileName}"</strong>
-      <div style="margin:10px 0;">
-        <label>Permission:
-          <select id="sharePermission">
-            <option value="View-only">View-only</option>
-            <option value="Download">Download Allowed</option>
-          </select>
-        </label>
-      </div>
-      <button id="generateShareLinkBtn" class="btn btn-primary">Generate Secure Link</button>
-      <div id="shareLinkResult" style="margin-top:12px;"></div>
-    </div>
-  `;
-  document.getElementById("generateShareLinkBtn").onclick = async () => {
-    const permission = document.getElementById("sharePermission").value;
-    const user = auth.currentUser;
-    if (!user) return;
-    const shareId = "share_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
-    const link = `${window.location.origin}/view.html?share=${shareId}`;
-    await db.ref(`shares/${shareId}`).set({
-      documentId: docId,
-      userId: user.uid,
-      permission,
-      status: "Active",
-      link,
-      createdAt: Date.now()
-    });
-    document.getElementById("shareLinkResult").innerHTML = `
-      <div>
-        <strong>Share Link:</strong>
-        <a href="${link}" target="_blank">${link}</a>
-        <span class="status-tag">Active</span>
-      </div>
-    `;
-    renderDashboardSummary(user);
-    renderDocuments(user);
-  };
-  document.getElementById("closeShareModal").onclick = () => {
-    shareModal.style.display = "none";
-    shareModalContent.innerHTML = "";
-  };
+  // Redirect to share page with pre-selected document
+  window.location.href = `share.html?docId=${docId}&fileName=${encodeURIComponent(fileName)}`;
 };
 
 window.openPermissionsModal = function(docId) {
@@ -242,11 +197,14 @@ window.revokeDocument = async function(docId) {
   if (!user) return;
   const sharesSnap = await db.ref("shares").orderByChild("documentId").equalTo(docId).once("value");
   const shares = sharesSnap.val() || {};
+  let docName = "Unknown Document";
   for (let [id, share] of Object.entries(shares)) {
     if (share.userId === user.uid && share.status === "Active") {
+      docName = share.documentName || docName;
       await db.ref(`shares/${id}/status`).set("Revoked");
     }
   }
+  await logActivity(user.uid, "Share Revoked", `Revoked all shares for "${docName}"`);
   renderDashboardSummary(user);
   renderDocuments(user);
 };
@@ -254,11 +212,18 @@ window.revokeDocument = async function(docId) {
 window.deleteDocument = async function(docId, ipfsCid) {
   const user = auth.currentUser;
   if (!user) return;
+  
+  // Get document name before deleting
+  const docSnap = await db.ref(`documents/${user.uid}/${docId}`).once("value");
+  const docData = docSnap.val();
+  const docName = docData?.fileName || "Unknown Document";
+  
   // Unpin from Pinata first
   if (ipfsCid) {
     await deleteFromPinata(ipfsCid);
   }
   await db.ref(`documents/${user.uid}/${docId}`).remove();
+  await logActivity(user.uid, "Document Deleted", `Deleted "${docName}" from IPFS storage (CID: ${ipfsCid})`);
   showDocumentsMsg("Document deleted!", "success");
   renderDashboardSummary(user);
   renderDocuments(user);
@@ -365,6 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
           userId: user.uid
         };
         await db.ref(`documents/${user.uid}`).push(meta);
+        await logActivity(user.uid, "Document Uploaded", `Uploaded "${file.name}" (${(file.size/1024).toFixed(2)} KB) to IPFS with CID: ${cid}`);
         updateUploadStatus("✅ Upload successful!", "success");
         showDocumentsMsg(`File "${file.name}" uploaded successfully!`, "success");
         setTimeout(() => {
@@ -551,7 +517,88 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 100);
 });
 
+// --- Logging Functions ---
+async function logActivity(userId, action, details) {
+  if (!userId || !db) return;
+  try {
+    await db.ref(`logs/${userId}`).push({
+      action,
+      details,
+      timestamp: Date.now(),
+      date: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error("Logging error:", err);
+  }
+}
+
+async function renderLogs(user) {
+  if (!user) return;
+  const logsContainer = document.getElementById("accessTimeline");
+  if (!logsContainer) return;
+  
+  try {
+    const logsSnap = await db.ref(`logs/${user.uid}`).orderByChild("timestamp").limitToLast(50).once("value");
+    const logs = logsSnap.val() || {};
+    const logsArray = Object.entries(logs).map(([id, log]) => ({ id, ...log })).reverse();
+    
+    if (logsArray.length === 0) {
+      logsContainer.innerHTML = '<p style="color: #6b7280;">No activity logs yet.</p>';
+      return;
+    }
+    
+    logsContainer.innerHTML = logsArray.map(log => {
+      const logType = log.action.toLowerCase().includes('upload') ? 'upload' : 
+                      log.action.toLowerCase().includes('share') ? 'share' :
+                      log.action.toLowerCase().includes('delete') ? 'delete' :
+                      log.action.toLowerCase().includes('revoke') ? 'revoke' : 'access';
+      return `
+        <div class="log-entry">
+          <div class="log-header">
+            <div>
+              <span class="log-action">${log.action}</span>
+              <span class="log-type ${logType}">${logType.toUpperCase()}</span>
+            </div>
+            <span class="log-time">${new Date(log.timestamp).toLocaleString()}</span>
+          </div>
+          <div class="log-details">${log.details}</div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error("Error rendering logs:", err);
+    logsContainer.innerHTML = '<p style="color: #d23333;">Error loading logs.</p>';
+  }
+}
+
 // --- Share Page Functions ---
+let allUsers = [];
+
+async function loadAllUsers() {
+  try {
+    const usersSnap = await db.ref("users").once("value");
+    const users = usersSnap.val() || {};
+    allUsers = Object.entries(users).map(([uid, user]) => ({ uid, ...user }));
+  } catch (err) {
+    console.error("Error loading users:", err);
+  }
+}
+
+function filterUsers(searchTerm) {
+  const search = searchTerm.toLowerCase();
+  return allUsers.filter(user => 
+    (user.fullName && user.fullName.toLowerCase().includes(search)) ||
+    (user.email && user.email.toLowerCase().includes(search))
+  );
+}
+
+window.clearUserSelection = function() {
+  document.getElementById("receiverEmail").value = "";
+  document.getElementById("receiverSearch").value = "";
+  document.getElementById("selectedUser").style.display = "none";
+  document.getElementById("userDropdown").style.display = "none";
+};
+
 async function populateDocumentDropdown(user) {
   if (!user) return;
   const selectDocument = document.getElementById("selectDocument");
@@ -572,6 +619,13 @@ async function populateDocumentDropdown(user) {
     option.dataset.fileName = doc.fileName;
     selectDocument.appendChild(option);
   });
+  
+  // Check for pre-selected document from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedDocId = urlParams.get('docId');
+  if (preSelectedDocId) {
+    selectDocument.value = preSelectedDocId;
+  }
 }
 
 async function validateRecipientEmail(email) {
@@ -635,7 +689,10 @@ window.revokeShare = async function(shareId) {
   if (!confirm("Are you sure you want to revoke this share?")) return;
   
   try {
+    const shareSnap = await db.ref(`shares/${shareId}`).once("value");
+    const shareData = shareSnap.val();
     await db.ref(`shares/${shareId}/status`).set("Revoked");
+    await logActivity(user.uid, "Share Revoked", `Revoked share for "${shareData?.documentName || 'Unknown'}" with ${shareData?.receiverEmail || 'unknown user'}`);
     showMsg("shareMessage", "Share revoked successfully!", "success");
     await renderActiveShares(user);
   } catch (err) {
@@ -644,9 +701,78 @@ window.revokeShare = async function(shareId) {
   }
 };
 
-// Share form submission handler
+// Share form submission handler and user dropdown
 document.addEventListener("DOMContentLoaded", () => {
   const shareForm = document.getElementById("shareForm");
+  const receiverSearch = document.getElementById("receiverSearch");
+  const userDropdown = document.getElementById("userDropdown");
+  const receiverEmail = document.getElementById("receiverEmail");
+  const selectedUser = document.getElementById("selectedUser");
+  const selectedUserText = document.getElementById("selectedUserText");
+  
+  if (receiverSearch && userDropdown) {
+    // Load users when focusing on search
+    receiverSearch.addEventListener("focus", async () => {
+      if (allUsers.length === 0) await loadAllUsers();
+      if (allUsers.length > 0) {
+        userDropdown.innerHTML = allUsers.slice(0, 10).map(user => `
+          <div class="user-dropdown-item" data-email="${user.email}">
+            <div class="user-name">${user.fullName || 'Unknown'}</div>
+            <div class="user-email">${user.email}</div>
+          </div>
+        `).join("");
+        userDropdown.style.display = "block";
+      }
+    });
+    
+    // Filter users on input
+    receiverSearch.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.trim();
+      if (searchTerm.length === 0) {
+        userDropdown.innerHTML = allUsers.slice(0, 10).map(user => `
+          <div class="user-dropdown-item" data-email="${user.email}">
+            <div class="user-name">${user.fullName || 'Unknown'}</div>
+            <div class="user-email">${user.email}</div>
+          </div>
+        `).join("");
+      } else {
+        const filtered = filterUsers(searchTerm).slice(0, 10);
+        if (filtered.length > 0) {
+          userDropdown.innerHTML = filtered.map(user => `
+            <div class="user-dropdown-item" data-email="${user.email}">
+              <div class="user-name">${user.fullName || 'Unknown'}</div>
+              <div class="user-email">${user.email}</div>
+            </div>
+          `).join("");
+        } else {
+          userDropdown.innerHTML = '<div style="padding: 10px; color: #6b7280;">No users found</div>';
+        }
+      }
+      userDropdown.style.display = "block";
+    });
+    
+    // Select user from dropdown
+    userDropdown.addEventListener("click", (e) => {
+      const item = e.target.closest(".user-dropdown-item");
+      if (item) {
+        const email = item.dataset.email;
+        const name = item.querySelector(".user-name").textContent;
+        receiverEmail.value = email;
+        receiverSearch.value = "";
+        selectedUserText.textContent = `${name} (${email})`;
+        selectedUser.style.display = "block";
+        userDropdown.style.display = "none";
+      }
+    });
+    
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!receiverSearch.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.style.display = "none";
+      }
+    });
+  }
+  
   if (shareForm) {
     shareForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -657,27 +783,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       const selectDocument = document.getElementById("selectDocument");
-      const receiverEmail = document.getElementById("receiverEmail").value.trim();
+      const receiverEmailValue = document.getElementById("receiverEmail").value.trim();
       const expiryDays = parseInt(document.getElementById("expiryTime").value);
       const permission = document.getElementById("permissionSelect").value;
       const documentId = selectDocument.value;
       const documentName = selectDocument.options[selectDocument.selectedIndex]?.dataset?.fileName || "Unknown";
       
-      if (!documentId || !receiverEmail || !permission || expiryDays === undefined) {
+      if (!documentId || !receiverEmailValue || !permission || expiryDays === undefined) {
         showMsg("shareMessage", "Please fill in all fields.", "error");
         return;
       }
       
-      if (receiverEmail === user.email) {
+      if (receiverEmailValue === user.email) {
         showMsg("shareMessage", "You cannot share a document with yourself.", "error");
-        return;
-      }
-      
-      showMsg("shareMessage", "Validating recipient...", "info");
-      
-      const recipientExists = await validateRecipientEmail(receiverEmail);
-      if (!recipientExists) {
-        showMsg("shareMessage", "Recipient email not found in the system. They must have an account.", "error");
         return;
       }
       
@@ -687,7 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
           documentId,
           documentName,
           userId: user.uid,
-          receiverEmail,
+          receiverEmail: receiverEmailValue,
           permission,
           expiryDays,
           expiryDate: expiryDays > 0 ? Date.now() + (expiryDays * 24 * 60 * 60 * 1000) : null,
@@ -697,9 +815,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         
         await db.ref(`shares/${shareId}`).set(shareData);
+        await logActivity(user.uid, "Document Shared", `Shared "${documentName}" with ${receiverEmailValue} (${permission} permission, expires: ${expiryDays === 0 ? 'Never' : expiryDays + ' days'})`);
         showMsg("shareMessage", "Document shared successfully!", "success");
         
         shareForm.reset();
+        clearUserSelection();
         await renderActiveShares(user);
       } catch (err) {
         showMsg("shareMessage", "Failed to share document. Please try again.", "error");
@@ -729,6 +849,9 @@ const waitForAuthInit = setInterval(() => {
       if (user && currentPage === "share.html") {
         populateDocumentDropdown(user);
         renderActiveShares(user);
+      }
+      if (user && currentPage === "logs.html") {
+        renderLogs(user);
       }
     });
   }

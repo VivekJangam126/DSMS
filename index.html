@@ -6,23 +6,119 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg">
-  <div class="landing-container">
-    <div class="landing-card">
-      <div class="logo-row">
-        <img src="https://images.unsplash.com/photo-1695370993561-ca297c22de6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzZWN1cmUlMjBkb2N1bWVudCUyMHNoYXJpbmclMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc1NjM4Njk3Nnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" class="logo" alt="DSMS Shield">
-        <span class="app-title">DSMS</span>
+<body>
+  <div class="landing-page">
+    <nav class="landing-nav">
+      <div class="nav-brand">
+        <span class="brand-icon">🔐</span>
+        <span class="brand-name">DSMS</span>
       </div>
-      <h1 class="main-heading">Decentralized Secure Management System</h1>
-      <p class="subheading">
-        Securely store, share, and manage your documents on a decentralized network.<br>
-        End-to-end privacy, blockchain audit trails, and instant sharing.
-      </p>
-      <div class="landing-actions">
-        <a href="auth.html" class="btn primary">Get Started</a>
-        <a href="auth.html" class="btn secondary">Login</a>
+      <div class="nav-actions">
+        <a href="auth.html" class="nav-btn">Sign In</a>
+        <a href="auth.html" class="nav-btn nav-btn-primary">Get Started</a>
       </div>
-    </div>
+    </nav>
+
+    <section class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Decentralized Secure Management System</h1>
+        <p class="hero-subtitle">
+          Store, share, and manage your documents on a decentralized network with complete privacy and security.
+          Built on IPFS and blockchain technology for ultimate data sovereignty.
+        </p>
+        <div class="hero-actions">
+          <a href="auth.html" class="btn btn-primary btn-large">Start Securing Your Documents</a>
+          <a href="#features" class="btn btn-secondary btn-large">Learn More</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Decentralized</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">E2E</div>
+            <div class="stat-label">Encrypted</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Availability</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features-section">
+      <h2 class="section-title">Powerful Features for Modern Document Management</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3 class="feature-title">IPFS Storage</h3>
+          <p class="feature-desc">Documents are stored on the InterPlanetary File System (IPFS) for permanent, decentralized access. No single point of failure.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔗</div>
+          <h3 class="feature-title">Secure Sharing</h3>
+          <p class="feature-desc">Generate secure share links with customizable permissions and expiration times. Control who accesses your documents and for how long.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Privacy First</h3>
+          <p class="feature-desc">Your documents are protected with end-to-end encryption. Only you control access to your data - no third parties involved.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">Activity Logs</h3>
+          <p class="feature-desc">Track all document activities with comprehensive audit trails. Know exactly who accessed what and when.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">Instant Access</h3>
+          <p class="feature-desc">Access your documents from anywhere, anytime. Fast retrieval from distributed IPFS nodes worldwide.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3 class="feature-title">Tamper-Proof</h3>
+          <p class="feature-desc">Blockchain-based verification ensures document integrity. Immutable records prevent unauthorized modifications.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Create Account</h3>
+          <p class="step-desc">Sign up with your email or connect your Web3 wallet for instant access.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Upload Documents</h3>
+          <p class="step-desc">Upload your files securely to IPFS. They're encrypted and distributed across the network.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Share & Manage</h3>
+          <p class="step-desc">Generate secure share links, set permissions, and track all document activities in real-time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <h2 class="cta-title">Ready to Secure Your Documents?</h2>
+      <p class="cta-subtitle">Join DSMS today and experience the future of decentralized document management.</p>
+      <a href="auth.html" class="btn btn-primary btn-large">Get Started for Free</a>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <span class="brand-icon">🔐</span>
+          <span class="brand-name">DSMS</span>
+        </div>
+        <p class="footer-text">Decentralized Secure Management System - Your data, your control.</p>
+      </div>
+    </footer>
   </div>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>

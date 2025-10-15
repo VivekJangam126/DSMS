@@ -394,3 +394,374 @@ input:focus {
   vertical-align: middle;
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* ========== User Dropdown ========== */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d3d7e0;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-dropdown-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f2f5;
+  transition: background 0.2s;
+}
+
+.user-dropdown-item:hover {
+  background: #f0f2f5;
+}
+
+.user-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.user-dropdown-item .user-name {
+  font-weight: 500;
+  color: #1a2640;
+}
+
+.user-dropdown-item .user-email {
+  font-size: 0.88em;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ========== Log Entries ========== */
+.log-entry {
+  padding: 14px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.log-entry:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-color: #1a4be7;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.log-action {
+  font-weight: 600;
+  color: #1a2640;
+  font-size: 0.95em;
+}
+
+.log-time {
+  font-size: 0.85em;
+  color: #6b7280;
+}
+
+.log-details {
+  font-size: 0.9em;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.log-type {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.log-type.upload { background: #dbeafe; color: #1e40af; }
+.log-type.share { background: #d1fae5; color: #065f46; }
+.log-type.delete { background: #fee2e2; color: #991b1b; }
+.log-type.access { background: #e0e7ff; color: #3730a3; }
+.log-type.revoke { background: #fef3c7; color: #92400e; }
+
+/* ========== Landing Page Styles ========== */
+.landing-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 5%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.brand-icon {
+  font-size: 1.6em;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-btn:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.nav-btn-primary {
+  background: white;
+  color: #667eea;
+}
+
+.nav-btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.hero-section {
+  text-align: center;
+  padding: 80px 5% 60px;
+  color: white;
+}
+
+.hero-title {
+  font-size: 3.2em;
+  font-weight: 800;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.25em;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+.btn-large {
+  padding: 16px 36px;
+  font-size: 1.1em;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #667eea;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 1em;
+  opacity: 0.9;
+}
+
+.features-section, .how-it-works {
+  background: white;
+  padding: 80px 5%;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-bottom: 60px;
+  color: #1a2640;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  padding: 30px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.feature-title {
+  font-size: 1.4em;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1a2640;
+}
+
+.feature-desc {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.steps-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.step {
+  flex: 1;
+  min-width: 250px;
+  text-align: center;
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8em;
+  font-weight: 700;
+  margin: 0 auto 20px;
+}
+
+.step-title {
+  font-size: 1.4em;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1a2640;
+}
+
+.step-desc {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  padding: 80px 5%;
+}
+
+.cta-title {
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-subtitle {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+  opacity: 0.95;
+}
+
+.landing-footer {
+  background: #1a2640;
+  color: white;
+  padding: 40px 5%;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.4em;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.footer-text {
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.2em;
+  }
+  .hero-subtitle {
+    font-size: 1.1em;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .section-title {
+    font-size: 2em;
+  }
+}
