@@ -366,6 +366,123 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// --- Auth Page Handlers ---
+document.addEventListener("DOMContentLoaded", () => {
+  const loginTab = document.getElementById("loginTab");
+  const registerTab = document.getElementById("registerTab");
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  // Tab switching
+  if (loginTab && registerTab && loginForm && registerForm) {
+    loginTab.addEventListener("click", () => {
+      loginTab.classList.add("active");
+      registerTab.classList.remove("active");
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
+      showMsg("loginMessage", "");
+      showMsg("registerMessage", "");
+    });
+
+    registerTab.addEventListener("click", () => {
+      registerTab.classList.add("active");
+      loginTab.classList.remove("active");
+      registerForm.style.display = "block";
+      loginForm.style.display = "none";
+      showMsg("loginMessage", "");
+      showMsg("registerMessage", "");
+    });
+  }
+
+  // Login form submission
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setBtnLoading("loginBtn", true);
+      showMsg("loginMessage", "");
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showMsg("loginMessage", "Login successful! Redirecting...", "success");
+      } catch (err) {
+        showMsg("loginMessage", err.message || "Login failed. Please try again.", "error");
+        setBtnLoading("loginBtn", false);
+      }
+    });
+  }
+
+  // Register form submission
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setBtnLoading("registerBtn", true);
+      showMsg("registerMessage", "");
+      const fullName = document.getElementById("registerFullName").value.trim();
+      const email = document.getElementById("registerEmail").value.trim();
+      const password = document.getElementById("registerPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (password !== confirmPassword) {
+        showMsg("registerMessage", "Passwords do not match.", "error");
+        setBtnLoading("registerBtn", false);
+        return;
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        await userCredential.user.updateProfile({ displayName: fullName });
+        await db.ref(`users/${userCredential.user.uid}`).set({
+          fullName,
+          email,
+          createdAt: Date.now()
+        });
+        showMsg("registerMessage", "Account created! Redirecting...", "success");
+      } catch (err) {
+        showMsg("registerMessage", err.message || "Registration failed. Please try again.", "error");
+        setBtnLoading("registerBtn", false);
+      }
+    });
+  }
+
+  // Logout handler
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await auth.signOut();
+        window.location.replace("auth.html");
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+    });
+  }
+
+  // MetaMask login buttons (placeholder functionality)
+  const loginMetaMaskBtn = document.getElementById("loginMetaMaskBtn");
+  const registerMetaMaskBtn = document.getElementById("registerMetaMaskBtn");
+  
+  if (loginMetaMaskBtn) {
+    loginMetaMaskBtn.addEventListener("click", () => {
+      alert("MetaMask Web3 login is not yet implemented. Please use email/password login.");
+    });
+  }
+  
+  if (registerMetaMaskBtn) {
+    registerMetaMaskBtn.addEventListener("click", () => {
+      alert("MetaMask Web3 login is not yet implemented. Please use email/password registration.");
+    });
+  }
+
+  // Update username display
+  auth.onAuthStateChanged(user => {
+    const mainUserName = document.getElementById("mainUserName");
+    if (mainUserName && user) {
+      mainUserName.textContent = user.displayName || user.email || "User";
+    }
+  });
+});
+
 // Only render after login
 auth.onAuthStateChanged(user => {
   if (!user && protectedPages.includes(currentPage)) {
