@@ -1,14 +1,16 @@
 {
-  "name": "workspace",
+  "name": "dsms-app",
   "version": "1.0.0",
-  "main": "script.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Decentralized Secure Management System - A decentralized document management system",
   "dependencies": {
     "http-server": "^14.1.1"
   }

@@ -1,25 +1,34 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyC4QwcMK93Hp1blRZRH9o9P2n1nLh8nOyg",
-  authDomain: "dsms-c67f6.firebaseapp.com",
-  projectId: "dsms-c67f6",
-  storageBucket: "dsms-c67f6.firebasestorage.app",
-  databaseURL: "https://dsms-c67f6-default-rtdb.firebaseio.com/",
-  messagingSenderId: "179646586869",
-  appId: "1:179646586869:web:ef7e431b1aa36fac994abc",
-  measurementId: "G-B2WV2LRJJE"
-};
-const pinataJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MWQwOGY2My05MmU2LTRlNjMtOWVmYy0wNjQyNjhiN2UzM2EiLCJlbWFpbCI6InZpdmVramFuZ2FtMTI2QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6IkZSQTEifSx7ImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxLCJpZCI6Ik5ZQzEifV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI1YmI5ODU3MjQ5Njk2ZTEwNTc5OCIsInNjb3BlZEtleVNlY3JldCI6Ijk0NjhjYzNjN2JjMjljNjY0Mzc1NTkwYWQ1M2FmMDMzNTE3NTYzM2RiOGQyNzBmMmFhOTYxYTExYjkxZTEwZjciLCJleHAiOjE3OTE0NzA3NDR9.G-AmgSYnT2VZTCn-n-j2eXvo9GVj54fcSCJs0JZRRIM";
-
+// Configuration will be loaded from backend
+let firebaseConfig = null;
+let pinataJWT = null;
 let db, auth;
+let configLoaded = false;
 
-if (typeof firebase !== 'undefined') {
-  if (!firebase.apps?.length) {
-    firebase.initializeApp(firebaseConfig);
+// Fetch configuration from backend
+async function loadConfig() {
+  try {
+    const response = await fetch('/api/config');
+    const config = await response.json();
+    firebaseConfig = config.firebase;
+    pinataJWT = config.pinataJWT;
+    
+    // Initialize Firebase after config is loaded
+    if (typeof firebase !== 'undefined' && firebaseConfig) {
+      if (!firebase.apps?.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.database();
+      auth = firebase.auth();
+      configLoaded = true;
+    }
+  } catch (error) {
+    console.error('Failed to load configuration:', error);
+    configLoaded = false;
   }
-  db = firebase.database();
-  auth = firebase.auth();
 }
+
+// Load config when script loads
+loadConfig();
 
 const protectedPages = [
   "dashboard.html",
@@ -528,13 +537,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Update username display
-  auth.onAuthStateChanged(user => {
-    const mainUserName = document.getElementById("mainUserName");
-    if (mainUserName && user) {
-      mainUserName.textContent = user.displayName || user.email || "User";
+  // Update username display - wait for config to load
+  const waitForAuth = setInterval(() => {
+    if (auth) {
+      clearInterval(waitForAuth);
+      auth.onAuthStateChanged(user => {
+        const mainUserName = document.getElementById("mainUserName");
+        if (mainUserName && user) {
+          mainUserName.textContent = user.displayName || user.email || "User";
+        }
+      });
     }
-  });
+  }, 100);
 });
 
 // --- Share Page Functions ---
@@ -695,22 +709,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Only render after login
-auth.onAuthStateChanged(user => {
-  if (!user && protectedPages.includes(currentPage)) {
-    window.location.replace("auth.html");
-    return;
+// Only render after login - wait for config to load first
+const waitForAuthInit = setInterval(() => {
+  if (auth) {
+    clearInterval(waitForAuthInit);
+    auth.onAuthStateChanged(user => {
+      if (!user && protectedPages.includes(currentPage)) {
+        window.location.replace("auth.html");
+        return;
+      }
+      if (user && currentPage === "auth.html") {
+        window.location.replace("dashboard.html");
+        return;
+      }
+      if (user && (currentPage === "dashboard.html" || currentPage === "documents.html")) {
+        renderDashboardSummary(user);
+        renderDocuments(user);
+      }
+      if (user && currentPage === "share.html") {
+        populateDocumentDropdown(user);
+        renderActiveShares(user);
+      }
+    });
   }
-  if (user && currentPage === "auth.html") {
-    window.location.replace("dashboard.html");
-    return;
-  }
-  if (user && (currentPage === "dashboard.html" || currentPage === "documents.html")) {
-    renderDashboardSummary(user);
-    renderDocuments(user);
-  }
-  if (user && currentPage === "share.html") {
-    populateDocumentDropdown(user);
-    renderActiveShares(user);
-  }
-});
+}, 100);
